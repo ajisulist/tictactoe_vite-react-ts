@@ -1,34 +1,61 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
+import { useState } from 'react';
+import reactLogo from './assets/react.svg';
+import './App.css';
 
+type Value = 'X' | 'O' | undefined;
+
+const WINNING_PATTERNS = [
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
+  [0, 4, 8],
+  [2, 4, 6],
+];
 function App() {
-  const [count, setCount] = useState(0)
+  const [turn, setTurn] = useState<Value>('X');
+  const [boardState, setBoardState] = useState<Record<number, Value>>({});
+  const [winner, setWinner] = useState<Value>(undefined);
+
+  const handleClickBlock = (x: number) => () => {
+    setBoardState((oldState) => {
+      if (!oldState[x]) {
+        setTurn((oldTurn) => (oldTurn === 'X' ? 'O' : 'X'));
+        return { ...oldState, [x]: turn };
+      }
+      return oldState;
+    });
+  };
 
   return (
     <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <h1>TicTacToe</h1>
+      <div className="board">
+        {Array(9)
+          .fill(null)
+          .map((el, idx) => {
+            return (
+              <Block value={boardState[idx]} onClick={handleClickBlock(idx)} />
+            );
+          })}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </div>
-  )
+  );
 }
 
-export default App
+interface BlockProps {
+  value: Value;
+  onClick: () => void;
+}
+
+const Block = (props: BlockProps) => {
+  return (
+    <div className="block" onClick={props.onClick}>
+      {props.value}
+    </div>
+  );
+};
+
+export default App;
